@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block customStyles %}
+.image{
+    height:200px;
+}
+.content{
+    color:red;
+}
+.myfieldclass{
+    margin:15px
+}
+.form-field{
+    width:300px;
+    margin-right:5px;
+    margin-top:2px
+}
+.invisible{
+    height:0;
+    width:0;
+}
+
+{% endblock %}
+{% block content %}
+<div class="container">
+<button id="new" class="btn btn-primary">Add New Event</button> 
+    <div  class="add_job bg-white ">
+        <form method="POST" action="" id="form1" class="flex justify-start p-5 invisible">
+            {% csrf_token%}
+            {{ form.non_field_errors }}
+            <div class="">
+                {{ form.name.errors }}
+                <label class="text-gray-400" for="{{ form.name..id_for_label }}">Name</label><br>
+                <span class=" form-field">{{form.name}}</span>
+            </div>
+            <div class="form-field">
+                {{ form.description.errors }}
+                <label class="text-gray-400" for="{{ form.description.id_for_label }}">Description</label><br>
+                {{form.description}}
+            </div>
+            <div class="form-field">
+                {{ form.date.errors }}
+                <label class="text-gray-400" for="{{ form.date.id_for_label }}">Start Date</label><br>
+                {{form.date}}
+            </div>
+            <div class="mr-5 mt-2">
+                {{ form.time.errors }}
+                <label class="text-gray-400" for="{{  form.time.id_for_label }}">Time</label><br>
+                {{ form.time}}
+            </div>
+            <div class="mr-5 mt-2">
+                {{ form.image.errors }}
+                <label class="text-gray-400" for="{{  form.image.id_for_label }}">Time</label><br>
+                {{ form.image}}
+            </div>
+            <div class=" mr-5 mt-2">
+                {{ form.address1.errors }}
+                <label class="text-gray-400" for="{{ form.address1.id_for_label }}">Address Line 1</label><br>
+                {{form.address1}}
+            </div>
+            <div class=" mr-5 mt-2">
+                {{ form.address2.errors }}
+                <label class="text-gray-400" for="{{ form.address2.id_for_label }}">Address Line 2</label><br>
+                {{form.address2}}
+            </div>
+                <div class=" mr-5 mt-2">
+                {{ form.city.errors }}
+                <label class="text-gray-400" for="{{ form.city.id_for_label }}">City</label><br>
+                {{form.city}}
+            </div>
+                <div class=" mr-5 mt-2 ">
+                {{ form.zip_code.errors }}
+                <label class="text-gray-400" for="{{ form.zip_code.id_for_label }}">Zip Code</label><br>
+                {{form.zip_code}}
+            </div>
+            <div class="">
+                <button type="submit" name="submit" value="submit" class="btn btn-secondary mt-3">Add</button>
+            </div>
+        </form>
+    </div>
+<h4> All Events</h4>
+<div class="row">
+{% for i in events%}
+  <div class="col-sm-6 col-md-4 p-3">
+    <div class="card">
+    <img src="{{i.image.url}}" class="card-img-top image img-fluid" alt="...">
+    <div class="card-body">
+
+        <p class="card-title">
+        <span class="fs-2 text">{{i.name}} </span>
+        <i id="like{{i.id}}" value={{i.id}} class="{% if i.is_liked%}invisible{% endif %}"  onClick="like(this)" style="cursor:pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+            </svg>
+        </i>   
+        <i id="unlike{{i.id}}" class="{% if i.is_liked%}{% else %} invisible{% endif %}" value={{i.id}} onClick="like(this)"  style="cursor:pointer">
+            <svg xmlns="http://www.w3.org/2000/svg"  width="30" height="30"  fill="currentColor" class="bi bi-heart-fill" color="red" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+            </svg>
+        </i>
+        </p>       
+         
+        <span class="fs-5 text content">{{i.time|date:'H:i'}} {{i.date|date:"l, d F y"}} </span>
+        <p class="fs-5 text card-text">{{i.location.city}}</p>
+
+    </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}
+{% block customscript %}
+<script>
+$(function () {
+    like = function (elm) {
+        $.ajax({
+            type : "GET", 
+            url:"{% url 'like' %}",
+            data: {
+            event_id: $(elm).attr('value'),
+            dataType: "json",
+            },
+            cache: false,
+            success: function(data){
+            $('#like'+$(elm).attr('value')).toggleClass('invisible')
+            $('#unlike'+$(elm).attr('value')).toggleClass('invisible')
+            },
+            failure: function() {
+                console.log("success")
+            }
+        });
+    };
+});
+$('#form1').on('submit', function(e){
+    e.preventDefault();
+    $.ajax({
+            type : "POST", 
+            url:"{% url 'add' %}",
+            data: {
+            name: $('#id_name').val(),
+            description: $('#id_description').val(),
+            date: $('#id_date').val(),
+            time: $('#id_time').val(),
+            image: $('#id_image').val(),
+            address1: $('#id_address1').val(),
+            address2: $('#id_address2').val(),
+            city: $('#id_city').val(),
+            zip_code: $('#id_zip_code').val(),
+            csrfmiddlewaretoken: $("input[name='csrfmiddlewaretoken']").val(),
+            dataType: "json",
+            },
+            cache: false,
+            success: function(data){
+            $('#form1')[0].reset();
+            alert("Event added") /* response message */
+            $("#overlay").css('display', 'none');
+            },
+            failure: function(msg) {
+                console.log("success")
+                alert("submission failed")
+            }
+        });
+    }); 
+$('#new').click(function(){
+    $('#new').toggleClass('btn-secondary');
+    $('#form1').toggleClass('invisible')
+    $('#new').toggleClass('btn-primary');
+})
+ 
+</script>
+{% endblock %}
