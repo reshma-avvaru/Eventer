@@ -97,7 +97,7 @@ DATABASES = {
         'NAME': 'ignis',
         'HOST': '127.0.0.1',
         'PORT': '3306',
-        'PASSWORD': 'nexXdv@6'
+        'PASSWORD': 'password'
     },
 }
 
